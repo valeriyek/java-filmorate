@@ -21,7 +21,7 @@ public class UserController {
 
 
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
         // Если имя пользователя пустое, заменяем его на логин
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -31,7 +31,7 @@ public class UserController {
         // Добавляем пользователя в коллекцию
         users.add(user);
         log.info("Пользователь создан: {}", user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED); // Возвращаем статус 201
+        return user;
     }
 
     @PutMapping("/{id}")
@@ -40,7 +40,7 @@ public class UserController {
         User existingUser = findUserById(id);
         if (existingUser == null) {
             log.error("Пользователь с id {} не найден", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Возвращаем статус 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // 404
         }
 
         // Если имя пользователя пустое, заменяем его на логин
@@ -48,14 +48,19 @@ public class UserController {
             user.setName(user.getLogin());
         }
 
-        // Логика обновления данных пользователя
-        existingUser.setLogin(user.getLogin());
-        existingUser.setName(user.getName());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setBirthday(user.getBirthday());
+        user.setId(id); // Устанавливаем ID, чтобы обновить правильного пользователя
+        updateUserInStorage(user);
+        log.info("Пользователь обновлен: {}", user);
+        return ResponseEntity.ok(user); // Возвращаем обновлённого пользователя
+    }
 
-        log.info("Пользователь с id {} обновлён: {}", id, existingUser);
-        return new ResponseEntity<>(existingUser, HttpStatus.OK); // Возвращаем обновленного пользователя
+
+    private void updateUserInStorage(User user) {
+        // Обновляем пользователя в хранилище (списке)
+        int index = users.indexOf(findUserById(user.getId()));
+        if (index != -1) {
+            users.set(index, user);
+        }
     }
 
     @GetMapping

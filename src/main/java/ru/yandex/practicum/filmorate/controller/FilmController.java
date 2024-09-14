@@ -43,19 +43,10 @@ public class FilmController {
             log.error("Фильм с id {} не найден.", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Возвращаем 404
         }
-        // Проверяем дату релиза
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.error("Ошибка валидации фильма: дата релиза раньше 28 декабря 1895 года.");
-            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года.");
-        }
-        // Обновляем фильм
-        existingFilm.setName(film.getName());
-        existingFilm.setDescription(film.getDescription());
-        existingFilm.setReleaseDate(film.getReleaseDate());
-        existingFilm.setDuration(film.getDuration());
-
-        log.info("Фильм с id {} обновлён: {}", id, existingFilm);
-        return ResponseEntity.ok(existingFilm);
+        film.setId(id); // Устанавливаем ID для правильного обновления фильма
+        updateFilmInStorage(film);
+        log.info("Фильм обновлён: {}", film);
+        return ResponseEntity.ok(film); // Возвращаем обновлённый фильм
     }
 
     // Метод поиска фильма по ID
@@ -64,6 +55,14 @@ public class FilmController {
                 .filter(film -> film.getId() == id)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void updateFilmInStorage(Film film) {
+        // Обновляем фильм в хранилище (списке)
+        int index = films.indexOf(findFilmById(film.getId()));
+        if (index != -1) {
+            films.set(index, film);
+        }
     }
 
     @GetMapping
