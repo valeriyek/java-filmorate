@@ -52,6 +52,7 @@ public class UserController {
         existingUser.setLogin(user.getLogin());
         existingUser.setName(user.getName());
         existingUser.setEmail(user.getEmail());
+        existingUser.setBirthday(user.getBirthday());
 
         log.info("Пользователь с id {} обновлён: {}", id, existingUser);
         return new ResponseEntity<>(existingUser, HttpStatus.OK); // Возвращаем обновленного пользователя

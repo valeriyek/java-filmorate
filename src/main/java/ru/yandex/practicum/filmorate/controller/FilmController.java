@@ -43,7 +43,11 @@ public class FilmController {
             log.error("Фильм с id {} не найден.", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Возвращаем 404
         }
-
+        // Проверяем дату релиза
+        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+            log.error("Ошибка валидации фильма: дата релиза раньше 28 декабря 1895 года.");
+            throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года.");
+        }
         // Обновляем фильм
         existingFilm.setName(film.getName());
         existingFilm.setDescription(film.getDescription());
