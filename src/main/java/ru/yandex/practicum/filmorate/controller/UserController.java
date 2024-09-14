@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
@@ -33,15 +34,15 @@ public class UserController {
 
 
     @PutMapping
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
         User existingUser = findUserById(user.getId());
         if (existingUser == null) {
             log.error("Пользователь с id {} не найден", user.getId());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            throw new ResourceNotFoundException("Пользователь с id " + user.getId() + " не найден");
         }
         updateUserInStorage(user);
         log.info("Пользователь обновлен: {}", user);
-        return ResponseEntity.ok(user);
+        return user;
     }
 
 

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -35,15 +36,15 @@ public class FilmController {
     }
 
     @PutMapping
-    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film film) {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         Film existingFilm = findFilmById(film.getId());
         if (existingFilm == null) {
             log.error("Фильм с id {} не найден.", film.getId());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            throw new ResourceNotFoundException("Фильм с id " + film.getId() + " не найден");
         }
         updateFilmInStorage(film);
         log.info("Фильм обновлён: {}", film);
-        return ResponseEntity.ok(film);
+        return film;
     }
 
     // Метод поиска фильма по ID
