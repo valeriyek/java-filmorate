@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @RequestMapping("/films")
@@ -16,6 +17,8 @@ import java.util.List;
 public class FilmController {
 
     private final List<Film> films = new ArrayList<>();
+    private final AtomicInteger idGenerator = new AtomicInteger(1); // Генератор ID
+
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
@@ -23,6 +26,7 @@ public class FilmController {
             log.error("Ошибка валидации фильма: дата релиза раньше 28 декабря 1895 года.");
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года.");
         }
+        film.setId(idGenerator.getAndIncrement()); // Назначаем уникальный ID
 
         films.add(film);
         log.info("Фильм добавлен: {}", film);
