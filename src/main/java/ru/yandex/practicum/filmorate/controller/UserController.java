@@ -22,13 +22,7 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        // Если имя пользователя пустое, заменяем его на логин
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        // Назначаем уникальный ID
-        user.setId(idGenerator.getAndIncrement());
-        // Добавляем пользователя в коллекцию
+        user.setId(idGenerator.getAndIncrement()); // Назначаем уникальный ID
         users.add(user);
         log.info("Пользователь создан: {}", user);
         return user;
@@ -42,12 +36,6 @@ public class UserController {
             log.error("Пользователь с id {} не найден", id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // 404
         }
-
-        // Если имя пользователя пустое, заменяем его на логин
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-
         user.setId(id); // Устанавливаем ID, чтобы обновить правильного пользователя
         updateUserInStorage(user);
         log.info("Пользователь обновлен: {}", user);
@@ -64,9 +52,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        log.info("Запрошен список всех пользователей.");
-        return new ResponseEntity<>(users, HttpStatus.OK); // Возвращаем статус 200
+    public List<User> getAllUsers() {
+        return users; // Возвращаем всех пользователей
     }
 
     // Вспомогательный метод для поиска пользователя по ID
