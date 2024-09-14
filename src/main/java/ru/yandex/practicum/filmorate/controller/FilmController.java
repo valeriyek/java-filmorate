@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/films")
@@ -33,10 +35,30 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        log.info("Фильм обновлён: {}", film);
-        return film;
+    @PutMapping("/{id}")
+    public ResponseEntity<Film> updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
+        // Ищем фильм по ID
+        Film existingFilm = findFilmById(id);
+        if (existingFilm == null) {
+            log.error("Фильм с id {} не найден.", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Возвращаем 404
+        }
+
+        // Обновляем фильм
+        existingFilm.setName(film.getName());
+        existingFilm.setDescription(film.getDescription());
+        existingFilm.setReleaseDate(film.getReleaseDate());
+        existingFilm.setDuration(film.getDuration());
+
+        log.info("Фильм с id {} обновлён: {}", id, existingFilm);
+        return ResponseEntity.ok(existingFilm);
+    }
+    // Метод поиска фильма по ID
+    private Film findFilmById(int id) {
+        return films.stream()
+                .filter(film -> film.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 
     @GetMapping
