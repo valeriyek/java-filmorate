@@ -28,25 +28,22 @@ public class FilmController {
             log.error("Ошибка валидации фильма: дата релиза раньше 28 декабря 1895 года.");
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года.");
         }
-        film.setId(idGenerator.getAndIncrement()); // Назначаем уникальный ID
-
+        film.setId(idGenerator.getAndIncrement());
         films.add(film);
         log.info("Фильм добавлен: {}", film);
         return film;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Film> updateFilm(@PathVariable int id, @Valid @RequestBody Film film) {
-        // Ищем фильм по ID
-        Film existingFilm = findFilmById(id);
+    @PutMapping
+    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film film) {
+        Film existingFilm = findFilmById(film.getId());
         if (existingFilm == null) {
-            log.error("Фильм с id {} не найден.", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Возвращаем 404
+            log.error("Фильм с id {} не найден.", film.getId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        film.setId(id); // Устанавливаем ID для правильного обновления фильма
         updateFilmInStorage(film);
         log.info("Фильм обновлён: {}", film);
-        return ResponseEntity.ok(film); // Возвращаем обновлённый фильм
+        return ResponseEntity.ok(film);
     }
 
     // Метод поиска фильма по ID

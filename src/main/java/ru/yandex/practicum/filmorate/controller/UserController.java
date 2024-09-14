@@ -22,24 +22,26 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        user.setId(idGenerator.getAndIncrement()); // Назначаем уникальный ID
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin()); // Устанавливаем имя равным логину, если оно пустое
+        }
+        user.setId(idGenerator.getAndIncrement());
         users.add(user);
         log.info("Пользователь создан: {}", user);
         return user;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable int id, @Valid @RequestBody User user) {
-        // Ищем пользователя по ID
-        User existingUser = findUserById(id);
+
+    @PutMapping
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) {
+        User existingUser = findUserById(user.getId());
         if (existingUser == null) {
-            log.error("Пользователь с id {} не найден", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // 404
+            log.error("Пользователь с id {} не найден", user.getId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        user.setId(id); // Устанавливаем ID, чтобы обновить правильного пользователя
         updateUserInStorage(user);
         log.info("Пользователь обновлен: {}", user);
-        return ResponseEntity.ok(user); // Возвращаем обновлённого пользователя
+        return ResponseEntity.ok(user);
     }
 
 
