@@ -13,20 +13,24 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class ErrorHandler {
+    private static final String ERROR_KEY = "error";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
-        return new ResponseEntity<>(Collections.singletonMap("error", errorMessage), HttpStatus.BAD_REQUEST);
+        String errorMessage = "Некорректный запрос.";
+        if (ex.getBindingResult().getFieldError() != null) {
+            errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
+        }
+        return new ResponseEntity<>(Collections.singletonMap(ERROR_KEY, errorMessage), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<Map<String, String>> handleCustomValidationExceptions(ValidationException ex) {
-        return new ResponseEntity<>(Collections.singletonMap("error", ex.getMessage()), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(Collections.singletonMap(ERROR_KEY, ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return new ResponseEntity<>(Collections.singletonMap("error", ex.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(Collections.singletonMap(ERROR_KEY, ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 }
