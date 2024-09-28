@@ -33,4 +33,9 @@ public class ErrorHandler {
     public ResponseEntity<Map<String, String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         return new ResponseEntity<>(Collections.singletonMap(ERROR_KEY, ex.getMessage()), HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleAllUnhandledExceptions(Exception ex) {
+        return new ResponseEntity<>(Collections.singletonMap(ERROR_KEY, "Внутренняя ошибка сервера"), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
