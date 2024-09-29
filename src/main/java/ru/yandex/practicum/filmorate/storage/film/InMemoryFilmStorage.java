@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,8 +30,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(int id) {
-        return films.get(id);
+    public Optional<Film> getFilmById(int id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override

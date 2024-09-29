@@ -1,40 +1,48 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserService userService;
+    private final UserStorage userStorage;
 
-    @Autowired
-    public FilmService(FilmStorage filmStorage, UserService userService) {
-        this.filmStorage = filmStorage;
-        this.userService = userService;
-    }
 
     // Добавление лайка фильму
     public void addLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
-        User user = userService.getUserById(userId);
+        Optional<User> userOptional = userStorage.getUserById(userId);
+        if (userOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Пользователь с id " + userId + " не найден");
+        }
         film.getLikes().add(userId);
+        // Сохраняем изменения фильма в хранилище
+        filmStorage.updateFilm(film);
     }
 
     // Удаление лайка у фильма
     public void removeLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
-        User user = userService.getUserById(userId);
+        Optional<User> userOptional = userStorage.getUserById(userId);
+        if (userOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Пользователь с id " + userId + " не найден");
+        }
         film.getLikes().remove(userId);
+        // Сохраняем изменения фильма в хранилище
+        filmStorage.updateFilm(film);
     }
 
     // Получение самых популярных фильмов
@@ -47,12 +55,10 @@ public class FilmService {
 
     // Получение фильма по ID
     public Film getFilmById(int id) {
-        Film film = filmStorage.getFilmById(id);
-        if (film == null) {
-            throw new ResourceNotFoundException("Фильм с id " + id + " не найден");
-        }
-        return film;
+        return filmStorage.getFilmById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Фильм с id " + id + " не найден"));
     }
+
 
     // Получение всех фильмов
     public List<Film> getAllFilms() {
@@ -67,7 +73,7 @@ public class FilmService {
 
     // Обновление фильма
     public Film updateFilm(Film film) {
-        if (filmStorage.getFilmById(film.getId()) == null) {
+        if (filmStorage.getFilmById(film.getId()).isEmpty()) {
             throw new ResourceNotFoundException("Фильм с id " + film.getId() + " не найден");
         }
         validateFilm(film);

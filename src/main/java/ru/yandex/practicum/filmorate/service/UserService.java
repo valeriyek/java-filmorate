@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,13 +12,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
 
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     // Добавление в друзья
     public void addFriend(int userId, int friendId) {
@@ -26,6 +23,9 @@ public class UserService {
         User friend = getUserById(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
+        // Обновляем пользователей в хранилище
+        userStorage.updateUser(user);
+        userStorage.updateUser(friend);
     }
 
     // Удаление из друзей
@@ -34,13 +34,17 @@ public class UserService {
         User friend = getUserById(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
+        // Обновляем пользователей в хранилище
+        userStorage.updateUser(user);
+        userStorage.updateUser(friend);
     }
 
     // Получение списка друзей
     public List<User> getFriends(int userId) {
         User user = getUserById(userId);
         return user.getFriends().stream()
-                .map(userStorage::getUserById)
+                .map(id -> userStorage.getUserById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Друг с id " + id + " не найден")))
                 .collect(Collectors.toList());
     }
 
@@ -51,17 +55,16 @@ public class UserService {
         Set<Integer> commonIds = new HashSet<>(user.getFriends());
         commonIds.retainAll(otherUser.getFriends());
         return commonIds.stream()
-                .map(userStorage::getUserById)
+                .map(id -> userStorage.getUserById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Друг с id " + id + " не найден")))
                 .collect(Collectors.toList());
     }
 
     // Получение пользователя по ID
     public User getUserById(int id) {
-        User user = userStorage.getUserById(id);
-        if (user == null) {
-            throw new ResourceNotFoundException("Пользователь с id " + id + " не найден");
-        }
-        return user;
+        return userStorage.getUserById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id " + id + " не найден"));
+
     }
 
     // Получение всех пользователей
@@ -76,7 +79,7 @@ public class UserService {
 
     // Обновление пользователя
     public User updateUser(User user) {
-        if (userStorage.getUserById(user.getId()) == null) {
+        if (userStorage.getUserById(user.getId()).isEmpty()) {
             throw new ResourceNotFoundException("Пользователь с id " + user.getId() + " не найден");
         }
         return userStorage.updateUser(user);

@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,8 +30,8 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(int id) {
-        return users.get(id);
+    public Optional<User> getUserById(int id) {
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override
