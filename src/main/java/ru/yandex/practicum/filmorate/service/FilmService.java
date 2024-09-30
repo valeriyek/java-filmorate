@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,10 +23,8 @@ public class FilmService {
     // Добавление лайка фильму
     public void addLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
-        Optional<User> userOptional = userStorage.getUserById(userId);
-        if (userOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        User user = userStorage.getUserById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id " + userId + " не найден"));
         film.getLikes().add(userId);
         // Сохраняем изменения фильма в хранилище
         filmStorage.updateFilm(film);
@@ -36,10 +33,9 @@ public class FilmService {
     // Удаление лайка у фильма
     public void removeLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
-        Optional<User> userOptional = userStorage.getUserById(userId);
-        if (userOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Пользователь с id " + userId + " не найден");
-        }
+        User user = userStorage.getUserById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id " + userId + " не найден"));
+
         film.getLikes().remove(userId);
         // Сохраняем изменения фильма в хранилище
         filmStorage.updateFilm(film);
