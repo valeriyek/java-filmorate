@@ -102,7 +102,7 @@ LIMIT 10;
 
   ```  bash
 
-git clone https://github.com/educational1234/filmorate.git
+git clone https://github.com/educational1234/java-filmorate.git
 ```
 ### Перейдите в папку проекта:
 
