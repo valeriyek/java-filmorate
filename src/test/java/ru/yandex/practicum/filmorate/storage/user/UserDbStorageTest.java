@@ -29,11 +29,7 @@ public class UserDbStorageTest {
         userDbStorage.createUser(user);
 
         Optional<User> retrievedUser = userDbStorage.getUserById(user.getId());
-        assertThat(retrievedUser)
-                .isPresent()
-                .hasValueSatisfying(u ->
-                        assertThat(u).hasFieldOrPropertyWithValue("email", "test@example.com")
-                );
+        assertThat(retrievedUser).isPresent().hasValueSatisfying(u -> assertThat(u).hasFieldOrPropertyWithValue("email", "test@example.com"));
     }
 
     @Test
@@ -49,13 +45,11 @@ public class UserDbStorageTest {
         Optional<User> retrievedUser = userDbStorage.getUserById(user.getId());
         assertThat(retrievedUser).isPresent();
 
-        
+
         user.setName("Updated User");
         userDbStorage.updateUser(user);
 
         retrievedUser = userDbStorage.getUserById(user.getId());
-        assertThat(retrievedUser)
-                .isPresent()
-                .hasValueSatisfying(u -> assertThat(u).hasFieldOrPropertyWithValue("name", "Updated User"));
+        assertThat(retrievedUser).isPresent().hasValueSatisfying(u -> assertThat(u).hasFieldOrPropertyWithValue("name", "Updated User"));
     }
 }
