@@ -109,7 +109,7 @@ public class FilmDbStorage implements FilmStorage {
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("mpa_id"));
-        mpa.setName(rs.getString("mpa_name"));
+        mpa.setName(rs.getString("name"));
 
         Film film = new Film();
         film.setId(rs.getInt("film_id"));

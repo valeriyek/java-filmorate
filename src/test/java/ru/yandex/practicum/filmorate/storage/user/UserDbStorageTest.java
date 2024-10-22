@@ -35,4 +35,27 @@ public class UserDbStorageTest {
                         assertThat(u).hasFieldOrPropertyWithValue("email", "test@example.com")
                 );
     }
+
+    @Test
+    public void testUpdateUser() {
+        User user = new User();
+        user.setEmail("test@example.com");
+        user.setLogin("testuser");
+        user.setName("Test User");
+        user.setBirthday(LocalDate.of(1990, 1, 1));
+
+        userDbStorage.createUser(user);
+
+        Optional<User> retrievedUser = userDbStorage.getUserById(user.getId());
+        assertThat(retrievedUser).isPresent();
+
+        
+        user.setName("Updated User");
+        userDbStorage.updateUser(user);
+
+        retrievedUser = userDbStorage.getUserById(user.getId());
+        assertThat(retrievedUser)
+                .isPresent()
+                .hasValueSatisfying(u -> assertThat(u).hasFieldOrPropertyWithValue("name", "Updated User"));
+    }
 }
