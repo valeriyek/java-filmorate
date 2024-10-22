@@ -40,6 +40,7 @@ public class FilmDbStorageTest {
         filmDbStorage.deleteAllFilms(); // Удаляем все фильмы
         filmDbStorage.resetFilmIdSequence(); // Сбрасываем счетчик film_id
     }
+
     @AfterEach
     void cleanUp() {
         filmDbStorage.deleteAllFilms();
@@ -130,14 +131,10 @@ public class FilmDbStorageTest {
         film2.getLikes().add(1);
 
 
-
         filmDbStorage.addFilm(film1);
         filmDbStorage.addFilm(film2);
 
-        List<Film> popularFilms = filmDbStorage.getAllFilms().stream()
-                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
-                .limit(1)
-                .collect(Collectors.toList());
+        List<Film> popularFilms = filmDbStorage.getAllFilms().stream().sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size())).limit(1).collect(Collectors.toList());
 
 
         assertThat(popularFilms).hasSize(1);
