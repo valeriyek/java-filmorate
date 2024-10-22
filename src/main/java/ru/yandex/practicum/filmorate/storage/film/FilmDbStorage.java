@@ -27,8 +27,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         log.info("Добавление фильма: {}", film.getName());
-        String sql = "INSERT INTO films (name, description, release_date, duration, mpa_id) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO films (name, description, release_date, duration, mpa_id) " + "VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -56,13 +55,7 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         log.info("Обновление фильма с id: {}", film.getId());
         String sql = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
-        jdbcTemplate.update(sql,
-                film.getName(),
-                film.getDescription(),
-                Date.valueOf(film.getReleaseDate()),
-                film.getDuration(),
-                film.getMpa().getId(),
-                film.getId());
+        jdbcTemplate.update(sql, film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()), film.getDuration(), film.getMpa().getId(), film.getId());
 
         // Обновление жанров
         String deleteGenres = "DELETE FROM film_genres WHERE film_id = ?";
@@ -77,10 +70,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getFilmById(int id) {
-        String sql = "SELECT f.film_id, f.name AS film_name, f.description, f.release_date, " +
-                "f.duration, f.mpa_id, m.name AS mpa_name FROM films f " +
-                "JOIN mpa m ON f.mpa_id = m.mpa_id " +
-                "WHERE f.film_id = ?";
+        String sql = "SELECT f.film_id, f.name AS film_name, f.description, f.release_date, " + "f.duration, f.mpa_id, m.name AS mpa_name FROM films f " + "JOIN mpa m ON f.mpa_id = m.mpa_id " + "WHERE f.film_id = ?";
 
         List<Film> films = jdbcTemplate.query(sql, this::mapRowToFilm, id);
 
@@ -95,9 +85,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        String sql = "SELECT f.film_id, f.name AS film_name, f.description, f.release_date, " +
-                "f.duration, f.mpa_id, m.name AS mpa_name FROM films f " +
-                "JOIN mpa m ON f.mpa_id = m.mpa_id";
+        String sql = "SELECT f.film_id, f.name AS film_name, f.description, f.release_date, " + "f.duration, f.mpa_id, m.name AS mpa_name FROM films f " + "JOIN mpa m ON f.mpa_id = m.mpa_id";
 
         List<Film> films = jdbcTemplate.query(sql, this::mapRowToFilm);
 
@@ -134,8 +122,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Set<Genre> getGenresByFilmId(int filmId) {
-        String sql = "SELECT g.genre_id, g.name FROM film_genres fg " +
-                "JOIN genres g ON fg.genre_id = g.genre_id WHERE fg.film_id = ?";
+        String sql = "SELECT g.genre_id, g.name FROM film_genres fg " + "JOIN genres g ON fg.genre_id = g.genre_id WHERE fg.film_id = ?";
         List<Genre> genres = jdbcTemplate.query(sql, this::mapRowToGenre, filmId);
         return new HashSet<>(genres);
     }
@@ -146,15 +133,16 @@ public class FilmDbStorage implements FilmStorage {
         genre.setName(rs.getString("name"));
         return genre;
     }
+//Удаляет все фильмы и связанные записи
 
-    public void deleteAllFilms() {//Удаляет все фильмы и связанные записи
-
+    public void deleteAllFilms() {
         jdbcTemplate.update("DELETE FROM film_genres");
         jdbcTemplate.update("DELETE FROM films");
         log.info("Все фильмы и связанные записи удалены.");
     }
+//Сбрасывает счетчик автоинкремента для film_id
 
-    public void resetFilmIdSequence() {//Сбрасывает счетчик автоинкремента для film_id
+    public void resetFilmIdSequence() {
         jdbcTemplate.execute("ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1");
         log.info("Счетчик film_id сброшен.");
     }
