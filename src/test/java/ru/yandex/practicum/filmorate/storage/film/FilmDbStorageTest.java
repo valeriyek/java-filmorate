@@ -48,12 +48,16 @@ public class FilmDbStorageTest {
     void resetDatabase() {
         filmDbStorage.deleteAllFilms(); // Удаляем все фильмы
         filmDbStorage.resetFilmIdSequence(); // Сбрасываем счетчик film_id
+        userDbStorage.deleteAllUsers(); // Удаляем всех пользователей
+        userDbStorage.resetUserIdSequence(); // Сбрасываем счетчик user_id
     }
 
     @AfterEach
     void cleanUp() {
         filmDbStorage.deleteAllFilms();
         filmDbStorage.resetFilmIdSequence();
+        userDbStorage.deleteAllUsers(); // Удаляем всех пользователей
+        userDbStorage.resetUserIdSequence(); // Сбрасываем счетчик user_id
     }
 
 
@@ -118,6 +122,7 @@ public class FilmDbStorageTest {
     @Order(3)
     public void testGetPopularFilms() {
         // Создаем пользователя с user_id = 1
+        log.info("Создаем пользователя с user_id = 1");
         User user = new User();
         user.setId(1);
         user.setEmail("testuser@mail.com");
@@ -125,8 +130,9 @@ public class FilmDbStorageTest {
         user.setName("Test User");
         user.setBirthday(LocalDate.of(1990, 1, 1));
         userDbStorage.createUser(user); // Добавляем пользователя в базу
-
+        log.info("Пользователь 1 создан: {}", user);
         // Создаем второго пользователя с user_id = 2
+        log.info("Создаем пользователя с user_id = 2");
         User user2 = new User();
         user2.setId(2);
         user2.setEmail("testuser2@mail.com");
@@ -134,10 +140,11 @@ public class FilmDbStorageTest {
         user2.setName("Test User 2");
         user2.setBirthday(LocalDate.of(1992, 1, 1));
         userDbStorage.createUser(user2); // Добавляем второго пользователя
+        log.info("Пользователь 2 создан: {}", user2);
         Mpa mpa = new Mpa();
         mpa.setId(1);
 
-
+        log.info("Создаем фильм 1");
         Film film1 = new Film();
         film1.setName("Film 1");
         film1.setDescription("Description 1");
@@ -146,7 +153,8 @@ public class FilmDbStorageTest {
         film1.setMpa(mpa);
         film1.getLikes().add(1); // Пользователь 1 лайкает фильм
         film1.getLikes().add(2); // Пользователь 2 лайкает фильм
-
+        log.info("Фильм 1 создан: {}", film1);
+        log.info("Создаем фильм 2");
         Film film2 = new Film();
         film2.setName("Film 2");
         film2.setDescription("Description 2");
@@ -154,16 +162,17 @@ public class FilmDbStorageTest {
         film2.setDuration(100);
         film2.setMpa(mpa);
         film2.getLikes().add(1); // Пользователь 1 лайкает фильм
+        log.info("Фильм 2 создан: {}", film2);
         // Добавляем фильмы в базу
         filmDbStorage.addFilm(film1);
         filmDbStorage.addFilm(film2);
-
+        log.info("Фильмы добавлены в базу");
         // Тестируем получение популярных фильмов
         List<Film> popularFilms = filmDbStorage.getAllFilms().stream()
                 .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
                 .limit(1)
                 .collect(Collectors.toList());
-
+        log.info("Популярные фильмы: {}", popularFilms);
         assertThat(popularFilms).hasSize(1);
         assertThat(popularFilms.get(0).getName()).isEqualTo("Film 1");
     }

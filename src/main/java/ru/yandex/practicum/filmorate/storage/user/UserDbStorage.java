@@ -107,4 +107,15 @@ public class UserDbStorage implements UserStorage {
         List<Integer> friendIds = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("friend_id"), userId);
         return new HashSet<>(friendIds);
     }
+
+    public void resetUserIdSequence() {
+        jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1");
+        log.info("Счётчик user_id сброшен.");
+    }
+
+    public void deleteAllUsers() {
+        jdbcTemplate.update("DELETE FROM users");
+        log.info("Все пользователи удалены.");
+    }
+
 }
