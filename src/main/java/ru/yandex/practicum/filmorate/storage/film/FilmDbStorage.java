@@ -147,5 +147,15 @@ public class FilmDbStorage implements FilmStorage {
         return genre;
     }
 
+    public void deleteAllFilms() {//Удаляет все фильмы и связанные записи
 
+        jdbcTemplate.update("DELETE FROM film_genres");
+        jdbcTemplate.update("DELETE FROM films");
+        log.info("Все фильмы и связанные записи удалены.");
+    }
+
+    public void resetFilmIdSequence() {//Сбрасывает счетчик автоинкремента для film_id
+        jdbcTemplate.execute("ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1");
+        log.info("Счетчик film_id сброшен.");
+    }
 }

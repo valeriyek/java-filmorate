@@ -5,9 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,15 +20,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
+@Transactional
 public class FilmDbStorageTest {
 
     @Autowired
     @Qualifier("filmDbStorage")
     private FilmDbStorage filmDbStorage;
+    @Autowired
+    private MpaDbStorage mpaDbStorage;
+
+    @Autowired
+    private GenreDbStorage genreDbStorage;
+
+    @Autowired
+    private UserDbStorage userDbStorage;
 
     @BeforeEach
     void setUp() {
+        filmDbStorage.deleteAllFilms(); // Удаляем все фильмы
+        filmDbStorage.resetFilmIdSequence(); // Сбрасываем счетчик film_id
     }
+
 
     @Test
     public void testCreateAndFindFilm() {
