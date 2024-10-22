@@ -42,3 +42,11 @@ CREATE TABLE IF NOT EXISTS friends (
     FOREIGN KEY (friend_id) REFERENCES users(user_id),
     PRIMARY KEY (user_id, friend_id)
 );
+
+CREATE TABLE IF NOT EXISTS film_likes (
+    film_id INT,
+    user_id INT,
+    PRIMARY KEY (film_id, user_id),
+    FOREIGN KEY (film_id) REFERENCES films(film_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);

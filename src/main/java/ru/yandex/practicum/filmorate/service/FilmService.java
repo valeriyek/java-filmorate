@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.exception.ResourceNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmLikeDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
@@ -24,40 +24,35 @@ public class FilmService {
     private final UserStorage userStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
+    private final FilmLikeDbStorage filmLikeDbStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage, MpaStorage mpaStorage,
-                       GenreStorage genreStorage) {
+                       GenreStorage genreStorage,
+                       FilmLikeDbStorage filmLikeDbStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.mpaStorage = mpaStorage;
         this.genreStorage = genreStorage;
+        this.filmLikeDbStorage = filmLikeDbStorage;
     }
 
 
+    // Обновляем логику для добавления лайка
     public void addLike(int filmId, int userId) {
-        Film film = getFilmById(filmId);
-        User user = userStorage.getUserById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id " + userId + " не найден"));
-        film.getLikes().add(userId);
-        filmStorage.updateFilm(film);
+        filmLikeDbStorage.addLike(filmId, userId);
     }
 
 
+    // Обновляем логику для удаления лайка
     public void removeLike(int filmId, int userId) {
-        Film film = getFilmById(filmId);
-        User user = userStorage.getUserById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь с id " + userId + " не найден"));
-
-        film.getLikes().remove(userId);
-
-        filmStorage.updateFilm(film);
+        filmLikeDbStorage.removeLike(filmId, userId);
     }
 
 
     public List<Film> getMostPopularFilms(int count) {
         return filmStorage.getAllFilms().stream()
-                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
+                .sorted((f1, f2) -> Integer.compare(filmLikeDbStorage.getFilmLikes(f2.getId()), filmLikeDbStorage.getFilmLikes(f1.getId())))
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -119,4 +114,5 @@ public class FilmService {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года.");
         }
     }
+
 }

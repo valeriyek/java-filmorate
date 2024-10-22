@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -8,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
@@ -21,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 @Transactional
+@Slf4j
 public class FilmDbStorageTest {
 
     @Autowired
@@ -34,6 +38,11 @@ public class FilmDbStorageTest {
 
     @Autowired
     private UserDbStorage userDbStorage;
+    @Autowired
+    private FilmLikeDbStorage filmLikeDbStorage;
+    @Autowired
+    private FilmService filmService;
+
 
     @BeforeEach
     void resetDatabase() {
@@ -108,6 +117,23 @@ public class FilmDbStorageTest {
     @Test
     @Order(3)
     public void testGetPopularFilms() {
+        // Создаем пользователя с user_id = 1
+        User user = new User();
+        user.setId(1);
+        user.setEmail("testuser@mail.com");
+        user.setLogin("testuser");
+        user.setName("Test User");
+        user.setBirthday(LocalDate.of(1990, 1, 1));
+        userDbStorage.createUser(user); // Добавляем пользователя в базу
+
+        // Создаем второго пользователя с user_id = 2
+        User user2 = new User();
+        user2.setId(2);
+        user2.setEmail("testuser2@mail.com");
+        user2.setLogin("testuser2");
+        user2.setName("Test User 2");
+        user2.setBirthday(LocalDate.of(1992, 1, 1));
+        userDbStorage.createUser(user2); // Добавляем второго пользователя
         Mpa mpa = new Mpa();
         mpa.setId(1);
 
@@ -118,9 +144,8 @@ public class FilmDbStorageTest {
         film1.setReleaseDate(LocalDate.of(2000, 1, 1));
         film1.setDuration(120);
         film1.setMpa(mpa);
-        film1.getLikes().add(1);
-        film1.getLikes().add(2);
-
+        film1.getLikes().add(1); // Пользователь 1 лайкает фильм
+        film1.getLikes().add(2); // Пользователь 2 лайкает фильм
 
         Film film2 = new Film();
         film2.setName("Film 2");
@@ -128,17 +153,18 @@ public class FilmDbStorageTest {
         film2.setReleaseDate(LocalDate.of(2001, 1, 1));
         film2.setDuration(100);
         film2.setMpa(mpa);
-        film2.getLikes().add(1);
-
-
+        film2.getLikes().add(1); // Пользователь 1 лайкает фильм
+        // Добавляем фильмы в базу
         filmDbStorage.addFilm(film1);
         filmDbStorage.addFilm(film2);
 
-        List<Film> popularFilms = filmDbStorage.getAllFilms().stream().sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size())).limit(1).collect(Collectors.toList());
-
+        // Тестируем получение популярных фильмов
+        List<Film> popularFilms = filmDbStorage.getAllFilms().stream()
+                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
+                .limit(1)
+                .collect(Collectors.toList());
 
         assertThat(popularFilms).hasSize(1);
         assertThat(popularFilms.get(0).getName()).isEqualTo("Film 1");
     }
-
 }

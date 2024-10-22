@@ -147,4 +147,5 @@ public class FilmDbStorage implements FilmStorage {
         Integer nextVal = jdbcTemplate.queryForObject("SELECT MAX(film_id) FROM films", Integer.class);
         log.info("Счетчик film_id сброшен, текущее значение: {}", nextVal);
     }
+
 }
