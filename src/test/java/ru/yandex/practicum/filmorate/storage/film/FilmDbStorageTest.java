@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 @Transactional
 public class FilmDbStorageTest {
@@ -37,13 +36,19 @@ public class FilmDbStorageTest {
     private UserDbStorage userDbStorage;
 
     @BeforeEach
-    void setUp() {
+    void resetDatabase() {
         filmDbStorage.deleteAllFilms(); // Удаляем все фильмы
         filmDbStorage.resetFilmIdSequence(); // Сбрасываем счетчик film_id
+    }
+    @AfterEach
+    void cleanUp() {
+        filmDbStorage.deleteAllFilms();
+        filmDbStorage.resetFilmIdSequence();
     }
 
 
     @Test
+    @Order(1)
     public void testCreateAndFindFilm() {
         Film film = new Film();
         film.setName("Test Film");
@@ -71,6 +76,7 @@ public class FilmDbStorageTest {
 
 
     @Test
+    @Order(2)
     public void testGetAllFilms() {
         Mpa mpa = new Mpa();
         mpa.setId(1);
@@ -99,6 +105,7 @@ public class FilmDbStorageTest {
     }
 
     @Test
+    @Order(3)
     public void testGetPopularFilms() {
         Mpa mpa = new Mpa();
         mpa.setId(1);
@@ -112,7 +119,7 @@ public class FilmDbStorageTest {
         film1.setMpa(mpa);
         film1.getLikes().add(1);
         film1.getLikes().add(2);
-        film1.getLikes().add(3);
+
 
         Film film2 = new Film();
         film2.setName("Film 2");
@@ -121,7 +128,7 @@ public class FilmDbStorageTest {
         film2.setDuration(100);
         film2.setMpa(mpa);
         film2.getLikes().add(1);
-        film2.getLikes().add(2);
+
 
 
         filmDbStorage.addFilm(film1);

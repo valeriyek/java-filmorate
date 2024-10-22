@@ -144,6 +144,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public void resetFilmIdSequence() {
         jdbcTemplate.execute("ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1");
-        log.info("Счетчик film_id сброшен.");
+        Integer nextVal = jdbcTemplate.queryForObject("SELECT MAX(film_id) FROM films", Integer.class);
+        log.info("Счетчик film_id сброшен, текущее значение: {}", nextVal);
     }
 }
