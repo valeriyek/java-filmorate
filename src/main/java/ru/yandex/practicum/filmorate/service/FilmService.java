@@ -77,13 +77,13 @@ public class FilmService {
     public Film addFilm(Film film) {
         validateFilm(film);
         if (film.getMpa() == null || mpaStorage.getMpaById(film.getMpa().getId()).isEmpty()) {
-            throw new ResourceNotFoundException("MPA с id " + film.getMpa().getId() + " не найден");
+            throw new ValidationException("MPA с id " + film.getMpa().getId() + " не найден");
         }
 
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 if (genreStorage.getGenreById(genre.getId()).isEmpty()) {
-                    throw new ResourceNotFoundException("Жанр с id " + genre.getId() + " не найден");
+                    throw new ValidationException("Жанр с id " + genre.getId() + " не найден");
                 }
             }
         }
@@ -97,14 +97,14 @@ public class FilmService {
         }
         validateFilm(film);
         if (film.getMpa() == null || mpaStorage.getMpaById(film.getMpa().getId()).isEmpty()) {
-            throw new ResourceNotFoundException("MPA с id " + film.getMpa().getId() + " не найден");
+            throw new ValidationException("MPA с id " + film.getMpa().getId() + " не найден");
         }
 
 
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 if (genreStorage.getGenreById(genre.getId()).isEmpty()) {
-                    throw new ResourceNotFoundException("Жанр с id " + genre.getId() + " не найден");
+                    throw new ValidationException("Жанр с id " + genre.getId() + " не найден");
                 }
             }
         }

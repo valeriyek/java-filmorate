@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,8 +11,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,34 +22,33 @@ public class FilmDbStorageTest {
     @Qualifier("filmDbStorage")
     private FilmDbStorage filmDbStorage;
 
+    @BeforeEach
+    void setUp() {
+    }
 
     @Test
     public void testCreateAndFindFilm() {
-        Mpa mpa = new Mpa();
-        mpa.setId(1);
-        mpa.setName("G");
-
         Film film = new Film();
         film.setName("Test Film");
         film.setDescription("Test Description");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120);
+        Mpa mpa = new Mpa();
+        mpa.setId(3); // PG-13
         film.setMpa(mpa);
-
         Genre genre = new Genre();
-        genre.setId(1);
-        genre.setName("Комедия");
+        genre.setId(1); // Комедия
+        film.getGenres().add(genre);
 
-        film.setGenres(Set.of(genre));
+        Film createdFilm = filmDbStorage.addFilm(film);
+        assertThat(createdFilm.getId()).isGreaterThan(0);
 
-        filmDbStorage.addFilm(film);
-
-        Optional<Film> retrievedFilm = filmDbStorage.getFilmById(film.getId());
-        assertThat(retrievedFilm)
-                .isPresent()
-                .hasValueSatisfying(f ->
-                        assertThat(f).hasFieldOrPropertyWithValue("name", "Test Film")
-                );
+        Film retrievedFilm = filmDbStorage.getFilmById(createdFilm.getId()).orElse(null);
+        assertThat(retrievedFilm).isNotNull();
+        assertThat(retrievedFilm.getName()).isEqualTo("Test Film");
+        assertThat(retrievedFilm.getMpa().getName()).isEqualTo("PG-13");
+        assertThat(retrievedFilm.getGenres()).hasSize(1);
+        assertThat(retrievedFilm.getGenres().iterator().next().getName()).isEqualTo("Комедия");
     }
 
 
