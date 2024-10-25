@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -12,7 +13,10 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Component("userDbStorage")
 @RequiredArgsConstructor
@@ -24,11 +28,18 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        log.info("Создание пользователя: {}", user.getLogin());
+        // Проверяем, существует ли пользователь с таким email
+        String checkEmailSql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        Integer count = jdbcTemplate.queryForObject(checkEmailSql, Integer.class, user.getEmail());
 
+        if (count != null && count > 0) {
+            throw new DuplicateKeyException("Пользователь с таким email уже существует: " + user.getEmail());
+        }
+
+        // Если пользователя с таким email нет, выполняем вставку
         String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
-
         KeyHolder keyHolder = new GeneratedKeyHolder();
+
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"user_id"});
             stmt.setString(1, user.getEmail());
@@ -38,9 +49,8 @@ public class UserDbStorage implements UserStorage {
             return stmt;
         }, keyHolder);
 
-        int userId = Objects.requireNonNull(keyHolder.getKey()).intValue();
-        user.setId(userId);
-        log.info("Пользователь создан с id: {}", userId);
+        // Устанавливаем сгенерированный ID пользователя и возвращаем объект
+        user.setId(keyHolder.getKey().intValue());
         return user;
     }
 

@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS mpa (
     mpa_id INT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+     mpa_name VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS films (
     film_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
+   film_name VARCHAR(255) NOT NULL,
     description VARCHAR(200),
     release_date DATE,
     duration INT,
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS film_genres (
 
 CREATE TABLE IF NOT EXISTS users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(255) NOT NULL,
-    login VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    login VARCHAR(255) NOT NULL UNIQUE,
     name VARCHAR(255),
     birthday DATE
 );
@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS friends (
     user_id INT,
     friend_id INT,
-    status BOOLEAN,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (friend_id) REFERENCES users(user_id),
     PRIMARY KEY (user_id, friend_id)

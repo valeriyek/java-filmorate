@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.storage.genre;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     public List<Genre> getAllGenres() {
@@ -47,5 +50,13 @@ public class GenreDbStorage implements GenreStorage {
         genre.setId(rs.getInt("genre_id"));
         genre.setName(rs.getString("name"));
         return genre;
+    }
+
+    @Override
+    public List<Genre> getGenresByIds(List<Integer> genreIds) {
+        String sql = "SELECT * FROM genres WHERE genre_id IN (:ids)";
+        MapSqlParameterSource parameters = new MapSqlParameterSource();
+        parameters.addValue("ids", genreIds);
+        return namedParameterJdbcTemplate.query(sql, parameters, this::mapRowToGenre);
     }
 }

@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.HashSet;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -18,49 +19,43 @@ public class FriendDbStorage implements FriendStorage {
 
     @Override
     public void addFriend(int userId, int friendId) {
-
         log.info("Добавление друга: пользователь {} добавляет пользователя {}", userId, friendId);
-        String checkSql = "SELECT COUNT(*) FROM friends WHERE user_id = ? AND friend_id = ?";
-        Integer count = jdbcTemplate.queryForObject(checkSql, Integer.class, friendId, userId);
-
-        if (count == 0) {
-            String sql = "INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, ?)";
-            jdbcTemplate.update(sql, userId, friendId, false);
-            log.info("Пользователь {} добавил пользователя {} в друзья", userId, friendId);
-        } else {
-            log.warn("Пользователь {} уже добавил пользователя {} в друзья", userId, friendId);
-        }
+        String sql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
+        jdbcTemplate.update(sql, userId, friendId);
     }
 
     @Override
     public void removeFriend(int userId, int friendId) {
         log.info("Удаление друга: пользователь {} удаляет пользователя {}", userId, friendId);
         String sql = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
-        int rowsAffected = jdbcTemplate.update(sql, userId, friendId);
-        if (rowsAffected > 0) {
-            log.info("Пользователь {} удалил пользователя {} из друзей", userId, friendId);
-        } else {
-            log.warn("Пользователь {} не был другом пользователя {}", userId, friendId);
-        }
+        jdbcTemplate.update(sql, userId, friendId);
     }
 
     @Override
-    public Set<Integer> getFriendsIds(int userId) {
+    public List<User> getFriends(int userId) {
         log.info("Получение списка друзей пользователя {}", userId);
-        String sql = "SELECT friend_id FROM friends WHERE user_id = ? AND status = false";
-        List<Integer> friends = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("friend_id"), userId);
-        Set<Integer> friendsSet = new HashSet<>(friends);
-        log.debug("Пользователь {} имеет друзей: {}", userId, friendsSet);
-        return friendsSet;
+        String sql = "SELECT u.* FROM users u JOIN friends f ON u.user_id = f.friend_id WHERE f.user_id = ?";
+        return jdbcTemplate.query(sql, this::mapRowToUser, userId);
     }
 
+
     @Override
-    public Set<Integer> getCommonFriendsIds(int userId, int otherId) {
+    public List<User> getCommonFriends(int userId, int otherId) {
         log.info("Получение общих друзей пользователей {} и {}", userId, otherId);
-        Set<Integer> userFriends = getFriendsIds(userId);
-        Set<Integer> otherFriends = getFriendsIds(otherId);
-        userFriends.retainAll(otherFriends);
-        log.debug("Общие друзья пользователей {} и {}: {}", userId, otherId, userFriends);
-        return userFriends;
+        String sql = "SELECT u.* FROM users u " +
+                "JOIN friends f1 ON u.user_id = f1.friend_id " +
+                "JOIN friends f2 ON u.user_id = f2.friend_id " +
+                "WHERE f1.user_id = ? AND f2.user_id = ?";
+        return jdbcTemplate.query(sql, this::mapRowToUser, userId, otherId);
+    }
+
+    private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
+        User user = new User();
+        user.setId(rs.getInt("user_id"));
+        user.setEmail(rs.getString("email"));
+        user.setLogin(rs.getString("login"));
+        user.setName(rs.getString("name"));
+        user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
+        return user;
     }
 }

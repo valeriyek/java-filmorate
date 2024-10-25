@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 
@@ -45,12 +43,11 @@ public class UserService {
 
 
     public List<User> getFriends(int userId) {
+        // Проверка существования пользователя
         getUserById(userId);
 
-        Set<Integer> friendsIds = friendStorage.getFriendsIds(userId);
-        return friendsIds.stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+        // Получение друзей как списка объектов User
+        return friendStorage.getFriends(userId);
     }
 
 
@@ -58,10 +55,8 @@ public class UserService {
         getUserById(userId);
         getUserById(otherId);
 
-        Set<Integer> commonFriendsIds = friendStorage.getCommonFriendsIds(userId, otherId);
-        return commonFriendsIds.stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+        // Получение общего списка друзей сразу через friendStorage
+        return friendStorage.getCommonFriends(userId, otherId);
     }
 
 

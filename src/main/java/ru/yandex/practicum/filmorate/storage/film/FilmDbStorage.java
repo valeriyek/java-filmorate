@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -27,7 +28,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         log.info("Добавление фильма: {}", film.getName());
-        String sql = "INSERT INTO films (name, description, release_date, duration, mpa_id) " + "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO films (film_name, description, release_date, duration, mpa_id) " + "VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -54,7 +55,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         log.info("Обновление фильма с id: {}", film.getId());
-        String sql = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
+        String sql = "UPDATE films SET film_name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()), film.getDuration(), film.getMpa().getId(), film.getId());
 
         // Обновление жанров
@@ -70,10 +71,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getFilmById(int id) {
-        String sql = "SELECT f.film_id, f.name AS film_name, f.description, f.release_date, " + "f.duration, f.mpa_id, m.name AS mpa_name FROM films f " + "JOIN mpa m ON f.mpa_id = m.mpa_id " + "WHERE f.film_id = ?";
+        String sql = "SELECT * FROM films f, mpa m WHERE f.mpa_id = m.mpa_id AND f.film_id = ?";
 
         List<Film> films = jdbcTemplate.query(sql, this::mapRowToFilm, id);
-
         if (films.isEmpty()) {
             return Optional.empty();
         }
@@ -83,9 +83,10 @@ public class FilmDbStorage implements FilmStorage {
         return Optional.of(film);
     }
 
+
     @Override
     public List<Film> getAllFilms() {
-        String sql = "SELECT f.film_id, f.name AS film_name, f.description, f.release_date, " + "f.duration, f.mpa_id, m.name AS mpa_name FROM films f " + "JOIN mpa m ON f.mpa_id = m.mpa_id";
+        String sql = "SELECT f.film_id, film_name, f.description, f.release_date, " + "f.duration, f.mpa_id, mpa_name FROM films f " + "JOIN mpa m ON f.mpa_id = m.mpa_id";
 
         List<Film> films = jdbcTemplate.query(sql, this::mapRowToFilm);
 
@@ -147,5 +148,34 @@ public class FilmDbStorage implements FilmStorage {
         Integer nextVal = jdbcTemplate.queryForObject("SELECT MAX(film_id) FROM films", Integer.class);
         log.info("Счетчик film_id сброшен, текущее значение: {}", nextVal);
     }
+
+    public List<Film> getMostPopularFilms(int count) {
+        String sql = "SELECT f.*, COUNT(fl.user_id) AS likes_count " +
+                "FROM films f LEFT JOIN film_likes fl ON f.film_id = fl.film_id " +
+                "GROUP BY f.film_id " +
+                "ORDER BY likes_count DESC " +
+                "LIMIT ?";
+        return jdbcTemplate.query(sql, new Object[]{count}, this::mapRowToFilm);
+    }
+
+    public List<User> getCommonFriends(int userId, int otherId) {
+        String sql = "SELECT u.* FROM users u " +
+                "JOIN friends f1 ON u.user_id = f1.friend_id " +
+                "JOIN friends f2 ON u.user_id = f2.friend_id " +
+                "WHERE f1.user_id = ? AND f2.user_id = ?";
+
+        return jdbcTemplate.query(sql, this::mapRowToUser, userId, otherId);
+    }
+
+    private User mapRowToUser(ResultSet rs, int rowNum) throws SQLException {
+        User user = new User();
+        user.setId(rs.getInt("user_id"));
+        user.setEmail(rs.getString("email"));
+        user.setLogin(rs.getString("login"));
+        user.setName(rs.getString("name"));
+        user.setBirthday(rs.getDate("birthday").toLocalDate());
+        return user;
+    }
+
 
 }

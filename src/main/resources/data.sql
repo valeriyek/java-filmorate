@@ -3,7 +3,7 @@ DELETE FROM films;
 DELETE FROM genres;
 DELETE FROM mpa;
 
-INSERT INTO mpa (mpa_id, name) VALUES
+INSERT INTO mpa (mpa_id, mpa_name) VALUES
 (1, 'G'),
 (2, 'PG'),
 (3, 'PG-13'),

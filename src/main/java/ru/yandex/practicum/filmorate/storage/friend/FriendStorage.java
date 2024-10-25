@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.friend;
 
-import java.util.Set;
+import ru.yandex.practicum.filmorate.model.User;
+
+import java.util.List;
 
 public interface FriendStorage {
     void addFriend(int userId, int friendId);
 
     void removeFriend(int userId, int friendId);
 
-    Set<Integer> getFriendsIds(int userId);
+    public List<User> getFriends(int userId);
 
-    Set<Integer> getCommonFriendsIds(int userId, int otherId);
+    List<User> getCommonFriends(int userId, int otherId);
 }

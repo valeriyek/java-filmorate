@@ -51,10 +51,7 @@ public class FilmService {
 
 
     public List<Film> getMostPopularFilms(int count) {
-        return filmStorage.getAllFilms().stream()
-                .sorted((f1, f2) -> Integer.compare(filmLikeDbStorage.getFilmLikes(f2.getId()), filmLikeDbStorage.getFilmLikes(f1.getId())))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getMostPopularFilms(count);
     }
 
 
@@ -114,5 +111,19 @@ public class FilmService {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года.");
         }
     }
+
+    public void validateFilmGenres(Film film) {
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            List<Integer> genreIds = film.getGenres().stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+            List<Genre> existingGenres = genreStorage.getGenresByIds(genreIds);
+
+            if (existingGenres.size() != genreIds.size()) {
+                throw new ValidationException("Ошибка жанра");
+            }
+        }
+    }
+
 
 }
