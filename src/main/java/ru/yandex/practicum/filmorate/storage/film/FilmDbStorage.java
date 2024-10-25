@@ -123,7 +123,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Set<Genre> getGenresByFilmId(int filmId) {
-        String sql = "SELECT g.genre_id, g.name FROM film_genres fg " + "JOIN genres g ON fg.genre_id = g.genre_id WHERE fg.film_id = ?";
+        String sql = "SELECT g.genre_id, g.genre_name FROM film_genres fg " + "JOIN genres g ON fg.genre_id = g.genre_id WHERE fg.film_id = ?";
         List<Genre> genres = jdbcTemplate.query(sql, this::mapRowToGenre, filmId);
         return new HashSet<>(genres);
     }
@@ -131,7 +131,7 @@ public class FilmDbStorage implements FilmStorage {
     private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
         Genre genre = new Genre();
         genre.setId(rs.getInt("genre_id"));
-        genre.setName(rs.getString("name"));
+        genre.setName(rs.getString("genre_name"));
         return genre;
     }
 //Удаляет все фильмы и связанные записи
@@ -172,7 +172,7 @@ public class FilmDbStorage implements FilmStorage {
         user.setId(rs.getInt("user_id"));
         user.setEmail(rs.getString("email"));
         user.setLogin(rs.getString("login"));
-        user.setName(rs.getString("name"));
+        user.setName(rs.getString("user_name"));
         user.setBirthday(rs.getDate("birthday").toLocalDate());
         return user;
     }

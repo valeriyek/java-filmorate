@@ -54,7 +54,7 @@ public class FriendDbStorage implements FriendStorage {
         user.setId(rs.getInt("user_id"));
         user.setEmail(rs.getString("email"));
         user.setLogin(rs.getString("login"));
-        user.setName(rs.getString("name"));
+        user.setName(rs.getString("user_name"));
         user.setBirthday(rs.getDate("birthday") != null ? rs.getDate("birthday").toLocalDate() : null);
         return user;
     }

@@ -10,7 +10,7 @@ INSERT INTO mpa (mpa_id, mpa_name) VALUES
 (4, 'R'),
 (5, 'NC-17');
 
-INSERT INTO genres (genre_id, name) VALUES
+INSERT INTO genres (genre_id, genre_name) VALUES
 (1, 'Комедия'),
 (2, 'Драма'),
 (3, 'Мультфильм'),

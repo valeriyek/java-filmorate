@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS films (
 
 CREATE TABLE IF NOT EXISTS genres (
     genre_id INT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
+     genre_name VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS film_genres (
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL UNIQUE,
     login VARCHAR(255) NOT NULL UNIQUE,
-    name VARCHAR(255),
+     user_name VARCHAR(255),
     birthday DATE
 );
 

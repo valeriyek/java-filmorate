@@ -37,7 +37,7 @@ public class UserDbStorage implements UserStorage {
         }
 
         // Если пользователя с таким email нет, выполняем вставку
-        String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (email, login, user_name, birthday) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -58,7 +58,7 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         log.info("Обновление пользователя с id: {}", user.getId());
 
-        String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET email = ?, login = ?, user_name = ?, birthday = ? WHERE user_id = ?";
         jdbcTemplate.update(sql,
                 user.getEmail(),
                 user.getLogin(),
@@ -107,7 +107,7 @@ public class UserDbStorage implements UserStorage {
         user.setId(rs.getInt("user_id"));
         user.setEmail(rs.getString("email"));
         user.setLogin(rs.getString("login"));
-        user.setName(rs.getString("name"));
+        user.setName(rs.getString("user_name"));
         user.setBirthday(rs.getDate("birthday").toLocalDate());
         return user;
     }
