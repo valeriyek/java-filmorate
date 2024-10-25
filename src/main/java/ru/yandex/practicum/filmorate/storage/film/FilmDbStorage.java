@@ -78,12 +78,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getMostPopularFilms(int count) {
-        String sql = "SELECT f.*, COUNT(fl.user_id) AS likes_count " +
-                "FROM films f LEFT JOIN film_likes fl ON f.film_id = fl.film_id " +
-                "GROUP BY f.film_id " +
+        String sql = "SELECT f.*, m.mpa_id, m.mpa_name, COUNT(fl.user_id) AS likes_count " +
+                "FROM films f " +
+                "LEFT JOIN film_likes fl ON f.film_id = fl.film_id " +
+                "JOIN mpa m ON f.mpa_id = m.mpa_id " +
+                "GROUP BY f.film_id, m.mpa_id, m.mpa_name " +
                 "ORDER BY likes_count DESC " +
                 "LIMIT ?";
-        return jdbcTemplate.query(sql, new Object[]{count}, this::mapRowToFilm);
+        return jdbcTemplate.query(sql, this::mapRowToFilm, count);
+
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
