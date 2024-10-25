@@ -112,7 +112,7 @@ public class FilmService {
         }
     }
 
-    public void validateFilmGenres(Film film) {
+    private void validateFilmGenres(Film film) {
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             List<Integer> genreIds = film.getGenres().stream()
                     .map(Genre::getId)
@@ -120,8 +120,15 @@ public class FilmService {
             List<Genre> existingGenres = genreStorage.getGenresByIds(genreIds);
 
             if (existingGenres.size() != genreIds.size()) {
-                throw new ValidationException("Ошибка жанра");
+                throw new ValidationException("Ошибка жанра: один или несколько жанров не найдены.");
             }
+        }
+
+    }
+
+    private void validateMpa(Film film) {
+        if (film.getMpa() == null || mpaStorage.getMpaById(film.getMpa().getId()).isEmpty()) {
+            throw new ValidationException("MPA с id " + film.getMpa().getId() + " не найден");
         }
     }
 
