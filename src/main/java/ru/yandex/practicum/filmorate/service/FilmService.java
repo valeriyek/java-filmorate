@@ -20,14 +20,14 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
-
     private final UserStorage userStorage;
     private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
     private final FilmLikeDbStorage filmLikeDbStorage;
 
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage, MpaStorage mpaStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage,
+                       MpaStorage mpaStorage,
                        GenreStorage genreStorage,
                        FilmLikeDbStorage filmLikeDbStorage) {
         this.filmStorage = filmStorage;
@@ -37,73 +37,43 @@ public class FilmService {
         this.filmLikeDbStorage = filmLikeDbStorage;
     }
 
-
-    // Обновляем логику для добавления лайка
     public void addLike(int filmId, int userId) {
         filmLikeDbStorage.addLike(filmId, userId);
     }
 
-
-    // Обновляем логику для удаления лайка
     public void removeLike(int filmId, int userId) {
         filmLikeDbStorage.removeLike(filmId, userId);
     }
 
-
     public List<Film> getMostPopularFilms(int count) {
         return filmStorage.getMostPopularFilms(count);
     }
-
 
     public Film getFilmById(int id) {
         return filmStorage.getFilmById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Фильм с id " + id + " не найден"));
     }
 
-
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
 
-
     public Film addFilm(Film film) {
         validateFilm(film);
-        if (film.getMpa() == null || mpaStorage.getMpaById(film.getMpa().getId()).isEmpty()) {
-            throw new ValidationException("MPA с id " + film.getMpa().getId() + " не найден");
-        }
-
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                if (genreStorage.getGenreById(genre.getId()).isEmpty()) {
-                    throw new ValidationException("Жанр с id " + genre.getId() + " не найден");
-                }
-            }
-        }
+        validateMpa(film);
+        validateFilmGenres(film);
         return filmStorage.addFilm(film);
     }
-
 
     public Film updateFilm(Film film) {
         if (filmStorage.getFilmById(film.getId()).isEmpty()) {
             throw new ResourceNotFoundException("Фильм с id " + film.getId() + " не найден");
         }
         validateFilm(film);
-        if (film.getMpa() == null || mpaStorage.getMpaById(film.getMpa().getId()).isEmpty()) {
-            throw new ValidationException("MPA с id " + film.getMpa().getId() + " не найден");
-        }
-
-
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                if (genreStorage.getGenreById(genre.getId()).isEmpty()) {
-                    throw new ValidationException("Жанр с id " + genre.getId() + " не найден");
-                }
-            }
-        }
-
+        validateMpa(film);
+        validateFilmGenres(film);
         return filmStorage.updateFilm(film);
     }
-
 
     private void validateFilm(Film film) {
         LocalDate earliestReleaseDate = LocalDate.of(1895, 12, 28);
@@ -123,7 +93,6 @@ public class FilmService {
                 throw new ValidationException("Ошибка жанра: один или несколько жанров не найдены.");
             }
         }
-
     }
 
     private void validateMpa(Film film) {
@@ -131,6 +100,4 @@ public class FilmService {
             throw new ValidationException("MPA с id " + film.getMpa().getId() + " не найден");
         }
     }
-
-
 }
