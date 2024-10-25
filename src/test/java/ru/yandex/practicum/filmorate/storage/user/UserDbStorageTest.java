@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.apache.tomcat.util.http.fileupload.ProgressListener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +20,14 @@ public class UserDbStorageTest {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private UserDbStorage userDbStorage;
+
     @BeforeEach
     public void resetDatabase() {
 
         jdbcTemplate.update("DELETE FROM users");
         jdbcTemplate.update("ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1");
     }
+
     @Test
     public void testCreateAndFindUser() {
         User user = new User();
