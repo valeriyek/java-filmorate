@@ -125,7 +125,6 @@ public class FilmDbStorage implements FilmStorage {
         return new HashSet<>(genres);
     }
 
-    // Метод для удаления всех фильмов
     public void deleteAllFilms() {
         jdbcTemplate.update("DELETE FROM film_genres");
         jdbcTemplate.update("DELETE FROM film_likes");
@@ -133,7 +132,6 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Все фильмы и связанные записи удалены.");
     }
 
-    // Метод для сброса счётчика ID фильмов
     public void resetFilmIdSequence() {
         jdbcTemplate.execute("ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1");
         log.info("Счётчик film_id сброшен.");
