@@ -38,6 +38,9 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
+        if (filmStorage.getFilmById(filmId).isEmpty() || userStorage.getUserById(userId).isEmpty()) {
+            throw new ResourceNotFoundException("Фильм или пользователь не найден");
+        }
         filmLikeDbStorage.addLike(filmId, userId);
     }
 
