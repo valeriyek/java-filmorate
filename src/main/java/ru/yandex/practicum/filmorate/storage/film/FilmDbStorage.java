@@ -83,7 +83,7 @@ public class FilmDbStorage implements FilmStorage {
                 "GROUP BY f.film_id " +
                 "ORDER BY likes_count DESC " +
                 "LIMIT ?";
-        return jdbcTemplate.query(sql, this::mapRowToFilm, count);
+        return jdbcTemplate.query(sql, new Object[]{count}, this::mapRowToFilm);
     }
 
     private Film mapRowToFilm(ResultSet rs, int rowNum) throws SQLException {
