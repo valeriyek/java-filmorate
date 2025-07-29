@@ -13,7 +13,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-
+/**
+ * Реализация {@link GenreStorage}, использующая JDBC для работы с таблицей жанров.
+ * Поддерживает получение всех жанров, жанра по ID и списка жанров по нескольким ID.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -22,6 +25,11 @@ public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    /**
+     * Возвращает список всех жанров.
+     *
+     * @return список жанров
+     */
     @Override
     public List<Genre> getAllGenres() {
         log.info("Получение всех жанров");
@@ -31,6 +39,12 @@ public class GenreDbStorage implements GenreStorage {
         return genres;
     }
 
+    /**
+     * Возвращает жанр по его ID.
+     *
+     * @param id ID жанра
+     * @return Optional с жанром, если найден
+     */
     @Override
     public Optional<Genre> getGenreById(int id) {
         log.info("Получение жанра с id: {}", id);
@@ -45,18 +59,25 @@ public class GenreDbStorage implements GenreStorage {
         return Optional.of(genre);
     }
 
-    private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
-        Genre genre = new Genre();
-        genre.setId(rs.getInt("genre_id"));
-        genre.setName(rs.getString("genre_name"));
-        return genre;
-    }
 
+    /**
+     * Возвращает список жанров по списку ID.
+     *
+     * @param genreIds список ID жанров
+     * @return список найденных жанров
+     */
     @Override
     public List<Genre> getGenresByIds(List<Integer> genreIds) {
         String sql = "SELECT * FROM genres WHERE genre_id IN (:ids)";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("ids", genreIds);
         return namedParameterJdbcTemplate.query(sql, parameters, this::mapRowToGenre);
+    }
+
+    private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
+        Genre genre = new Genre();
+        genre.setId(rs.getInt("genre_id"));
+        genre.setName(rs.getString("genre_name"));
+        return genre;
     }
 }

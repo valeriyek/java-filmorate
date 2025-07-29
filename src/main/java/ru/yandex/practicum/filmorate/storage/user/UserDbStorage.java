@@ -17,7 +17,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
+/**
+ * Реализация {@link UserStorage}, использующая JdbcTemplate для работы с таблицей пользователей.
+ * Обеспечивает операции CRUD, а также загрузку информации о друзьях.
+ */
 @Component("userDbStorage")
 @RequiredArgsConstructor
 @Slf4j
@@ -25,7 +28,14 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-
+    /**
+     * Создаёт нового пользователя.
+     * Проверяет уникальность email перед вставкой.
+     *
+     * @param user пользователь для создания
+     * @return созданный пользователь с ID
+     * @throws DuplicateKeyException если email уже используется
+     */
     @Override
     public User createUser(User user) {
         // Проверяем, существует ли пользователь с таким email
@@ -53,7 +63,12 @@ public class UserDbStorage implements UserStorage {
         user.setId(keyHolder.getKey().intValue());
         return user;
     }
-
+    /**
+     * Обновляет данные существующего пользователя.
+     *
+     * @param user пользователь для обновления
+     * @return обновлённый пользователь
+     */
     @Override
     public User updateUser(User user) {
         log.info("Обновление пользователя с id: {}", user.getId());
@@ -68,7 +83,12 @@ public class UserDbStorage implements UserStorage {
         log.info("Пользователь с id {} обновлен: {}", user.getId(), user);
         return user;
     }
-
+    /**
+     * Возвращает пользователя по его ID.
+     *
+     * @param id ID пользователя
+     * @return Optional с пользователем, если найден
+     */
     @Override
     public Optional<User> getUserById(int id) {
         log.info("Получение пользователя с id: {}", id);
@@ -85,7 +105,11 @@ public class UserDbStorage implements UserStorage {
         log.info("Пользователь найден: {}", user);
         return Optional.of(user);
     }
-
+    /**
+     * Возвращает список всех пользователей.
+     *
+     * @return список пользователей
+     */
     @Override
     public List<User> getAllUsers() {
         log.info("Получение всех пользователей");
@@ -117,12 +141,17 @@ public class UserDbStorage implements UserStorage {
         List<Integer> friendIds = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("friend_id"), userId);
         return new HashSet<>(friendIds);
     }
-
+    /**
+     * Сбрасывает автоинкремент ID для таблицы users.
+     */
     public void resetUserIdSequence() {
         jdbcTemplate.execute("ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1");
         log.info("Счётчик user_id сброшен.");
     }
-
+    /**
+     * Удаляет всех пользователей и их связи.
+     * Используется, как правило, для сброса состояния в тестах.
+     */
     public void deleteAllUsers() {
         jdbcTemplate.update("DELETE FROM users");
         log.info("Все пользователи удалены.");

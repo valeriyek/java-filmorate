@@ -10,6 +10,9 @@ import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.List;
 
+/**
+ * Контроллер для получения жанров фильмов.
+ */
 @RestController
 @RequestMapping("/genres")
 @RequiredArgsConstructor
@@ -17,11 +20,22 @@ public class GenreController {
 
     private final GenreService genreService;
 
+    /**
+     * Возвращает список всех жанров.
+     *
+     * @return список жанров
+     */
     @GetMapping
     public List<Genre> getAllGenres() {
         return genreService.getAllGenres();
     }
 
+    /**
+     * Возвращает жанр по ID.
+     *
+     * @param id ID жанра
+     * @return найденный жанр
+     */
     @GetMapping("/{id}")
     public Genre getGenreById(@PathVariable int id) {
         return genreService.getGenreById(id);

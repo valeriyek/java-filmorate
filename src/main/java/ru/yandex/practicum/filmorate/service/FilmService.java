@@ -16,6 +16,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для управления фильмами: добавление, обновление, получение,
+ * обработка лайков и выбор популярных фильмов.
+ */
 @Service
 public class FilmService {
 
@@ -37,6 +41,13 @@ public class FilmService {
         this.filmLikeDbStorage = filmLikeDbStorage;
     }
 
+    /**
+     * Добавляет лайк фильму от указанного пользователя.
+     *
+     * @param filmId ID фильма
+     * @param userId ID пользователя
+     * @throws ResourceNotFoundException если фильм или пользователь не найден
+     */
     public void addLike(int filmId, int userId) {
         if (filmStorage.getFilmById(filmId).isEmpty() || userStorage.getUserById(userId).isEmpty()) {
             throw new ResourceNotFoundException("Фильм или пользователь не найден");
@@ -44,23 +55,54 @@ public class FilmService {
         filmLikeDbStorage.addLike(filmId, userId);
     }
 
+    /**
+     * Удаляет лайк фильма от пользователя.
+     *
+     * @param filmId ID фильма
+     * @param userId ID пользователя
+     */
     public void removeLike(int filmId, int userId) {
         filmLikeDbStorage.removeLike(filmId, userId);
     }
 
+    /**
+     * Возвращает список самых популярных фильмов по количеству лайков.
+     *
+     * @param count максимальное количество фильмов
+     * @return список популярных фильмов
+     */
     public List<Film> getMostPopularFilms(int count) {
         return filmStorage.getMostPopularFilms(count);
     }
 
+    /**
+     * Возвращает фильм по его идентификатору.
+     *
+     * @param id ID фильма
+     * @return фильм
+     * @throws ResourceNotFoundException если фильм не найден
+     */
     public Film getFilmById(int id) {
         return filmStorage.getFilmById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Фильм с id " + id + " не найден"));
     }
 
+    /**
+     * Возвращает список всех фильмов.
+     *
+     * @return список фильмов
+     */
     public List<Film> getAllFilms() {
         return filmStorage.getAllFilms();
     }
 
+    /**
+     * Добавляет новый фильм с валидацией.
+     *
+     * @param film фильм для добавления
+     * @return добавленный фильм
+     * @throws ValidationException если нарушены бизнес-правила
+     */
     public Film addFilm(Film film) {
         validateFilm(film);
         validateMpa(film);
@@ -68,6 +110,14 @@ public class FilmService {
         return filmStorage.addFilm(film);
     }
 
+    /**
+     * Обновляет данные фильма с валидацией.
+     *
+     * @param film фильм для обновления
+     * @return обновлённый фильм
+     * @throws ResourceNotFoundException если фильм не найден
+     * @throws ValidationException       если нарушены бизнес-правила
+     */
     public Film updateFilm(Film film) {
         if (filmStorage.getFilmById(film.getId()).isEmpty()) {
             throw new ResourceNotFoundException("Фильм с id " + film.getId() + " не найден");

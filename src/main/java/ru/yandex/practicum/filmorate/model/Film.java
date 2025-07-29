@@ -6,7 +6,11 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
+/**
+ * Модель фильма.
+ * Содержит информацию о названии, описании, дате релиза, продолжительности,
+ * рейтинге MPA, жанрах и лайках от пользователей.
+ */
 @Data
 public class Film {
     private int id;
@@ -23,7 +27,7 @@ public class Film {
 
     @Positive(message = "Продолжительность должна быть положительным числом.")
     private int duration;
-
+    // Идентификаторы пользователей, поставивших лайк.
     private Set<Integer> likes = new HashSet<>();
 
     private Mpa mpa;

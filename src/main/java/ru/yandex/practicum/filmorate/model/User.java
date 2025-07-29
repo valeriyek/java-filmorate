@@ -7,7 +7,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
+/**
+ * Модель пользователя.
+ * Содержит информацию о пользователе,
+ * включая email, логин, имя, дату рождения
+ * и список друзей.
+ */
 @Data
 @NoArgsConstructor
 public class User {
@@ -26,8 +31,13 @@ public class User {
     @NotNull(message = "Дата рождения не может быть пустой.")
     @Past(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
+    // Идентификаторы пользователей-друзей.
     private Set<Integer> friends = new HashSet<>();
-
+    /**
+     * Устанавливает имя пользователя. Если имя пустое, устанавливается логин.
+     *
+     * @param name имя пользователя
+     */
     public void setName(String name) {
         if (name == null || name.isBlank()) {
             this.name = this.login;

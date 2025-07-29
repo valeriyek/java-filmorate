@@ -15,14 +15,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-
+/**
+ * Реализация {@link FilmStorage} для работы с фильмами в реляционной БД через JdbcTemplate.
+ * Поддерживает добавление, обновление, получение и удаление фильмов, а также работу с жанрами и рейтингами MPA.
+ */
 @Component("filmDbStorage")
 @Slf4j
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
+    /**
+     * Добавляет фильм в базу данных.
+     *
+     * @param film объект фильма
+     * @return добавленный фильм с присвоенным ID
+     */
     @Override
     public Film addFilm(Film film) {
         String sql = "INSERT INTO films (film_name, description, release_date, duration, mpa_id) VALUES (?, ?, ?, ?, ?)";
@@ -42,7 +50,12 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film;
     }
-
+    /**
+     * Обновляет информацию о фильме.
+     *
+     * @param film объект фильма
+     * @return обновлённый фильм
+     */
     @Override
     public Film updateFilm(Film film) {
         String sql = "UPDATE films SET film_name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE film_id = ?";
@@ -56,7 +69,12 @@ public class FilmDbStorage implements FilmStorage {
         }
         return film;
     }
-
+    /**
+     * Возвращает фильм по его ID.
+     *
+     * @param id ID фильма
+     * @return Optional с фильмом, если найден
+     */
     @Override
     public Optional<Film> getFilmById(int id) {
         String sql = "SELECT * FROM films f JOIN mpa m ON f.mpa_id = m.mpa_id WHERE f.film_id = ?";
@@ -68,7 +86,11 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(getGenresByFilmId(film.getId()));
         return Optional.of(film);
     }
-
+    /**
+     * Возвращает список всех фильмов.
+     *
+     * @return список фильмов
+     */
     @Override
     public List<Film> getAllFilms() {
         String sql = "SELECT f.*, m.mpa_name FROM films f JOIN mpa m ON f.mpa_id = m.mpa_id";
@@ -76,7 +98,12 @@ public class FilmDbStorage implements FilmStorage {
         films.forEach(film -> film.setGenres(getGenresByFilmId(film.getId())));
         return films;
     }
-
+    /**
+     * Возвращает список наиболее популярных фильмов по количеству лайков.
+     *
+     * @param count максимальное количество фильмов
+     * @return отсортированный список популярных фильмов
+     */
     public List<Film> getMostPopularFilms(int count) {
         String sql = "SELECT f.*, m.mpa_id, m.mpa_name, COUNT(fl.user_id) AS likes_count " +
                 "FROM films f " +
@@ -124,14 +151,20 @@ public class FilmDbStorage implements FilmStorage {
         }, filmId);
         return new HashSet<>(genres);
     }
-
+    /**
+     * Удаляет все фильмы и связанные с ними данные (жанры, лайки).
+     * Используется для сброса состояния базы в тестах.
+     */
     public void deleteAllFilms() {
         jdbcTemplate.update("DELETE FROM film_genres");
         jdbcTemplate.update("DELETE FROM film_likes");
         jdbcTemplate.update("DELETE FROM films");
         log.info("Все фильмы и связанные записи удалены.");
     }
-
+    /**
+     * Сбрасывает автоинкремент ID фильмов.
+     * Используется для тестов и восстановления начального состояния таблицы.
+     */
     public void resetFilmIdSequence() {
         jdbcTemplate.execute("ALTER TABLE films ALTER COLUMN film_id RESTART WITH 1");
         log.info("Счётчик film_id сброшен.");

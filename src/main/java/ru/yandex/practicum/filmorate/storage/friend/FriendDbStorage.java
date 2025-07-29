@@ -9,28 +9,46 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
+/**
+ * Реализация {@link FriendStorage} для работы с друзьями пользователей.
+ * Осуществляет добавление, удаление, получение друзей и общих друзей через JdbcTemplate.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class FriendDbStorage implements FriendStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
+    /**
+     * Добавляет друга пользователю.
+     *
+     * @param userId   ID пользователя
+     * @param friendId ID друга
+     */
     @Override
     public void addFriend(int userId, int friendId) {
         log.info("Добавление друга: пользователь {} добавляет пользователя {}", userId, friendId);
         String sql = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, userId, friendId);
     }
-
+    /**
+     * Удаляет друга у пользователя.
+     *
+     * @param userId   ID пользователя
+     * @param friendId ID друга
+     */
     @Override
     public void removeFriend(int userId, int friendId) {
         log.info("Удаление друга: пользователь {} удаляет пользователя {}", userId, friendId);
         String sql = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
         jdbcTemplate.update(sql, userId, friendId);
     }
-
+    /**
+     * Возвращает список друзей пользователя.
+     *
+     * @param userId ID пользователя
+     * @return список друзей
+     */
     @Override
     public List<User> getFriends(int userId) {
         log.info("Получение списка друзей пользователя {}", userId);
@@ -38,7 +56,13 @@ public class FriendDbStorage implements FriendStorage {
         return jdbcTemplate.query(sql, this::mapRowToUser, userId);
     }
 
-
+    /**
+     * Возвращает список общих друзей двух пользователей.
+     *
+     * @param userId   ID первого пользователя
+     * @param otherId  ID второго пользователя
+     * @return список общих друзей
+     */
     @Override
     public List<User> getCommonFriends(int userId, int otherId) {
         log.info("Получение общих друзей пользователей {} и {}", userId, otherId);

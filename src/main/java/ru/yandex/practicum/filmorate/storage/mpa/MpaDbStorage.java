@@ -10,14 +10,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-
+/**
+ * Реализация {@link MpaStorage}, использующая JdbcTemplate для работы с таблицей рейтингов MPA.
+ * Предоставляет доступ ко всем рейтингам и поиску по ID.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
+    /**
+     * Возвращает список всех рейтингов MPA.
+     *
+     * @return список рейтингов
+     */
     @Override
     public List<Mpa> getAllMpa() {
         log.info("Получение всех рейтингов MPA");
@@ -26,7 +33,12 @@ public class MpaDbStorage implements MpaStorage {
         log.info("Найдено рейтингов MPA: {}", mpas.size());
         return mpas;
     }
-
+    /**
+     * Возвращает рейтинг MPA по его ID.
+     *
+     * @param id ID рейтинга
+     * @return Optional с рейтингом, если найден
+     */
     @Override
     public Optional<Mpa> getMpaById(int id) {
         log.info("Получение рейтинга MPA с id: {}", id);
